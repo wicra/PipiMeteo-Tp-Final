@@ -30,6 +30,28 @@
   border-radius: var(--radius-md);
 }
 
+@media (max-width: 30rem) {
+  .forecast__list {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+
+  .forecast__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .forecast__day {
+    flex: 0 0 auto;
+    width: 7rem;
+    scroll-snap-align: start;
+  }
+}
+
 .forecast__date {
   font-size: 0.8125rem;
   font-weight: 600;
