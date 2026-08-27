@@ -1,0 +1,30 @@
+<article class="weather-card">
+  <header class="weather-card__header">
+    <h2 class="weather-card__city">{{ weather().city }}, {{ weather().country }}</h2>
+    <img
+      class="weather-card__icon"
+      [src]="'https://openweathermap.org/img/wn/' + weather().icon + '@2x.png'"
+      [alt]="weather().description"
+      width="100"
+      height="100"
+    />
+  </header>
+
+  <p class="weather-card__temperature">{{ weather().temperature }}°C</p>
+  <p class="weather-card__description">{{ weather().description }}</p>
+
+  <dl class="weather-card__details">
+    <div class="weather-card__detail">
+      <dt>Ressenti</dt>
+      <dd>{{ weather().feelsLike }}°C</dd>
+    </div>
+    <div class="weather-card__detail">
+      <dt>Humidité</dt>
+      <dd>{{ weather().humidity }}%</dd>
+    </div>
+    <div class="weather-card__detail">
+      <dt>Vent</dt>
+      <dd>{{ weather().windSpeed }} km/h</dd>
+    </div>
+  </dl>
+</article>
