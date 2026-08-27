@@ -1,17 +1,24 @@
 # PipiMeteo
 
-_À compléter par l'équipe : objectif du projet, présentation rapide de l'application._
+Application météo réalisée en équipe dans le cadre du projet final Angular. Elle permet de rechercher une ville et de consulter sa météo actuelle (température, ressenti, description, humidité, vent, icône) ainsi que ses prévisions à 5 jours, via l'API OpenWeather.
 
 ## Membres
 
-_À compléter par l'équipe._
+| Membre | Rôle |
+| --- | --- |
+| Killian | Socle Angular, routing et navigation |
+| Wicramachine | Formulaire de recherche et page d'accueil |
+| Gregory | API OpenWeather, service et état |
+| Ayman | Affichage météo, prévisions et tests UI |
 
 ## Technologies
 
 - Angular 21 (composants standalone, signals, routing)
 - TypeScript
+- RxJS (debounce, switchMap, gestion des flux asynchrones)
 - HTML / CSS
 - [OpenWeather API](https://openweathermap.org/api) (météo actuelle + prévisions 5 jours)
+- Vitest (tests unitaires et de composants)
 - Postman (tests et documentation des requêtes API)
 
 ## Installation
@@ -46,15 +53,50 @@ Tant que `environment.ts` n'est pas configuré, ou que `WeatherService` est en m
 
 ## Fonctionnalités obligatoires
 
-_À compléter par l'équipe au fur et à mesure de l'avancement (formulaire de recherche, routing, affichage météo, gestion des erreurs...)._
+- Page d'accueil (`/home`) avec présentation de l'application et formulaire de recherche.
+- Formulaire de recherche en Reactive Forms, validation obligatoire (`Veuillez saisir une ville.` si le champ est vide ou ne contient que des espaces).
+- Routing avec les 3 routes demandées : `/home`, `/weather/:city`, `/about` (+ redirection `**` vers `/home`).
+- Page météo (`/weather/:city`) affichant ville, pays, température, ressenti, description, humidité, vent et icône, à partir du paramètre de route.
+- Page About avec présentation du projet, membres de l'équipe et technologies utilisées.
+- Navbar responsive présente sur toutes les pages.
+- Communication avec l'API OpenWeather réalisée uniquement dans `WeatherService` (aucun appel HTTP dans les composants).
+- Gestion des états de chargement (`Chargement de la météo…`) et des erreurs : ville introuvable (404), quota dépassé (429), erreur générique — voir [section API](#api-openweather).
+- Anti-spam sur la recherche : `debounceTime` + `distinctUntilChanged` pour éviter les appels API inutiles en cas de frappe rapide ou de recherches répétées sur la même ville.
+- Communication entre composants via `@Input`/signals (`WeatherCard`, `Forecast` reçoivent leurs données en entrée, aucun composant enfant ne connaît la réponse brute d'OpenWeather).
+- Tests unitaires et de composants (formulaire, service météo, page météo, navbar, page d'accueil).
 
 ## Fonctionnalités supplémentaires
 
-_À compléter par l'équipe (fonctionnalité libre choisie et sa justification)._
+**Prévisions météo à 5 jours** (fonctionnalité libre) : en plus de la météo actuelle, l'application affiche les prévisions sur 5 jours pour la ville recherchée, via l'endpoint `/forecast` d'OpenWeather (voir [section API](#api-openweather)). Chaque jour affiche température, description et icône, avec gestion indépendante de ses propres états de chargement/erreur.
+
+Petit bonus visuel : un écran de chargement animé (petites gouttes jaunes) s'affiche à chaque ouverture de l'application.
 
 ## Architecture
 
-_À compléter par l'équipe (organisation des dossiers, découpage des composants). Voir aussi [docs/consignes/Regles_Dev.md](docs/consignes/Regles_Dev.md) pour les conventions décidées en amont._
+```text
+src/app/
+  core/
+    services/       WeatherService : seul point de communication avec OpenWeather
+    models/          Interfaces partagées (WeatherData, ForecastData) et fixtures
+  shared/
+    components/     Composants réutilisables (logo, écran de chargement)
+  pages/
+    home/           Page d'accueil : présentation et recherche
+    weather/        Page météo : lit la ville dans l'URL et affiche les données
+    about/          Page de présentation : équipe et technologies
+  components/
+    navbar/         Barre de navigation
+    search/         Formulaire de recherche
+    weather-card/   Carte d'affichage de la météo actuelle
+    forecast/       Section des prévisions à 5 jours
+```
+
+- **Pages** correspondent aux routes, assemblent les composants et lisent les paramètres d'URL. Aucun appel HTTP ni logique métier.
+- **Composants** gèrent l'affichage et les interactions ; ils reçoivent leurs données via `@Input`/`input()` et ne connaissent jamais la réponse brute d'OpenWeather.
+- **Services** (`core/services/`) sont le seul endroit qui communique avec l'API.
+- **Models** (`core/models/`) regroupent les interfaces partagées par toute l'équipe.
+
+Voir aussi [docs/structure.md](docs/structure.md) et [docs/consignes/Regles_Dev.md](docs/consignes/Regles_Dev.md) pour le détail des conventions décidées en amont par l'équipe.
 
 ## API OpenWeather
 
@@ -108,8 +150,15 @@ Chaque requête est documentée dans son onglet **Description** (objectif, méth
 
 ## Difficultés rencontrées
 
-_À compléter par l'équipe (au moins deux difficultés et leur résolution)._
+**1. Deux implémentations concurrentes de `WeatherService`.** Pendant que le service officiel était développé et documenté, un autre membre de l'équipe a implémenté sa propre version du service (méthodes, fixtures et tests différents) sans se synchroniser sur le contrat commun. Le merge a cassé le build (import dupliqué dans `app.config.ts`) et supprimé les fixtures officielles. Résolution : annulation propre du merge fautif avec `git revert` (sans réécrire l'historique), puis reprise du travail à partir de la version officielle du service, avec ses méthodes documentées dans [docs/weather-service.md](docs/weather-service.md).
+
+**2. Fichiers CSS manquants au build.** Après l'intégration de la page météo, `ng build` échouait avec des erreurs `NG2008: Could not find stylesheet file`. Deux nouveaux composants référençaient des fichiers `.css` jamais créés, et un fichier existant avait été supprimé par erreur alors qu'il était toujours référencé par `styleUrl`. Résolution : recréation des fichiers manquants, en gardant une séparation claire entre l'intégration fonctionnelle (faite en premier) et la passe de style (faite ensuite par l'équipe).
+
+**3. Animation de démarrage qui ne rejouait qu'une fois.** L'écran de chargement animé utilisait `sessionStorage` pour ne s'afficher qu'une seule fois par session de navigateur, ce qui donnait l'impression qu'elle ne fonctionnait pas dès qu'on rechargeait la page pendant les tests. Résolution : suppression de la persistance dans `sessionStorage`, l'animation se rejoue désormais à chaque chargement complet de l'application.
 
 ## Améliorations possibles
 
-_À compléter par l'équipe._
+- Ajouter un cache côté service pour éviter de refaire un appel API si la même ville est recherchée peu de temps après.
+- Ajouter des tests end-to-end couvrant le parcours complet (recherche → affichage météo → prévisions).
+- Enrichir la fonctionnalité libre avec un historique des dernières villes recherchées (via `localStorage`).
+- Finaliser une passe d'accessibilité complète sur l'ensemble des pages (contrastes, focus, lecteurs d'écran).
