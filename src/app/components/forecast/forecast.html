@@ -1,0 +1,19 @@
+<section class="forecast">
+  <h3 class="forecast__title">Prévisions sur 5 jours</h3>
+  <ul class="forecast__list">
+    @for (day of forecast().days; track day.date) {
+      <li class="forecast__day">
+        <span class="forecast__date">{{ formatDayName(day.date) }}</span>
+        <img
+          class="forecast__icon"
+          [src]="'https://openweathermap.org/img/wn/' + day.icon + '.png'"
+          [alt]="day.description"
+          width="50"
+          height="50"
+        />
+        <span class="forecast__description">{{ day.description }}</span>
+        <span class="forecast__temperature">{{ day.temperature }}°C</span>
+      </li>
+    }
+  </ul>
+</section>

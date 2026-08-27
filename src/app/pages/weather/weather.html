@@ -1,1 +1,31 @@
-<p>Page meteo placeholder pour {{ city() }} (a completer par Dev 4).</p>
+<main class="weather">
+  @if (city()) {
+    <h1 class="weather__city">{{ city() }}</h1>
+
+    @if (currentWeatherStatus() === 'loading') {
+      <div class="weather__loading" aria-live="polite">
+        <p>Chargement de la météo…</p>
+      </div>
+    } @else if (currentWeatherStatus() === 'error') {
+      <div class="weather__error" role="alert">
+        <p>{{ currentWeatherError() }}</p>
+      </div>
+    } @else if (currentWeather(); as weather) {
+      <app-weather-card [weather]="weather" />
+    } @else {
+      <p class="weather__idle">Recherchez une ville pour voir sa météo.</p>
+    }
+
+    @if (forecastStatus() === 'loading') {
+      <div class="weather__section-loading" aria-live="polite">
+        <p>Chargement des prévisions…</p>
+      </div>
+    } @else if (forecastStatus() === 'error') {
+      <div class="weather__section-error" role="alert">
+        <p>{{ forecastError() }}</p>
+      </div>
+    } @else if (forecast(); as forecastData) {
+      <app-forecast [forecast]="forecastData" />
+    }
+  }
+</main>
