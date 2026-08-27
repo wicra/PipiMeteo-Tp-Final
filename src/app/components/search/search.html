@@ -9,11 +9,13 @@
       placeholder="Paris"
       autocomplete="off"
       class="search__input"
+      [attr.aria-invalid]="submitted() && isCityMissing"
+      [attr.aria-describedby]="submitted() && isCityMissing ? 'city-error' : null"
     />
     <button type="submit" class="search__button">Rechercher</button>
   </div>
 
   @if (submitted() && isCityMissing) {
-    <p role="alert" class="search__error">Veuillez saisir une ville.</p>
+    <p id="city-error" role="alert" class="search__error">Veuillez saisir une ville.</p>
   }
 </form>

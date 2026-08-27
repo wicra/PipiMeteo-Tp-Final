@@ -31,3 +31,11 @@ Le titre utilise la police "Baloo 2" (Google Fonts, chargee dans `src/index.html
 - Jouee une seule fois par session via `sessionStorage` (cle `pipimeteo-splash-shown`), pas a chaque navigation interne.
 - Respecte `prefers-reduced-motion` : si l'utilisateur a active la reduction des animations au niveau systeme, l'ecran de pluie est saute immediatement.
 - Marque `aria-hidden="true"` car purement decoratif, sans element interactif ni contenu a annoncer aux lecteurs d'ecran.
+
+## Accessibilite
+
+- `--color-error` a ete ajuste (`#b91c1c`) pour atteindre un contraste AA (~6,35:1) sur le fond clair ; la teinte initiale (`#d1453d`) etait tout juste sous le seuil de 4,5:1.
+- Le message discret de la page d'accueil n'utilise plus d'opacite reduite (une opacite de 0.7 sur `--color-text-muted` faisait chuter le contraste a ~3,08:1, sous le seuil AA) : la discretion vient uniquement de la taille et de l'italique.
+- `lang="fr"` sur `<html>` (`src/index.html`), le contenu de l'application etant en francais.
+- Le champ ville expose `aria-invalid` et `aria-describedby` vers le message d'erreur uniquement quand celui-ci est affiche.
+- Les etats `:focus-visible` (input, bouton) sont visibles au clavier avec un contour `--color-primary`.
