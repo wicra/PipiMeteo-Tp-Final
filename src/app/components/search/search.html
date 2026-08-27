@@ -1,9 +1,19 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-  <label for="city">Ville</label>
-  <input id="city" type="text" formControlName="city" placeholder="Paris" autocomplete="off" />
-  <button type="submit">Rechercher</button>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="search" novalidate>
+  <label for="city" class="search__label">Ville</label>
+
+  <div class="search__row">
+    <input
+      id="city"
+      type="text"
+      formControlName="city"
+      placeholder="Paris"
+      autocomplete="off"
+      class="search__input"
+    />
+    <button type="submit" class="search__button">Rechercher</button>
+  </div>
 
   @if (submitted() && isCityMissing) {
-    <p role="alert">Veuillez saisir une ville.</p>
+    <p role="alert" class="search__error">Veuillez saisir une ville.</p>
   }
 </form>

@@ -31,6 +31,6 @@ describe('Home', () => {
   it('should show the empty state message', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain("Entrez le nom d'une ville");
+    expect(compiled.textContent).toContain('Le pipi est dans quelle ville ?');
   });
 });
