@@ -1,3 +1,14 @@
 <div class="rain-splash" [class.rain-splash--fading]="fadingOut()" aria-hidden="true">
-  <div class="rain-splash__rain"></div>
+  <div class="rain-splash__drops">
+    @for (drop of drops; track $index) {
+      <span
+        class="rain-splash__drop"
+        [style.left.%]="drop.left"
+        [style.height.px]="drop.height"
+        [style.opacity]="drop.opacity"
+        [style.animation-duration.s]="drop.duration"
+        [style.animation-delay.s]="-drop.delay"
+      ></span>
+    }
+  </div>
 </div>
