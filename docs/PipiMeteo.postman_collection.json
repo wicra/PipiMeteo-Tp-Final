@@ -1,0 +1,324 @@
+{
+  "info": {
+    "_postman_id": "pipimeteo-collection",
+    "name": "PipiMeteo - OpenWeather API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection Postman pour tester les endpoints OpenWeather utilises par l'application PipiMeteo. Cette collection permet de valider les appels API avant integration dans Angular."
+  },
+  "item": [
+    {
+      "name": "Meteo Actuelle",
+      "description": "Recupere les donnees meteo actuelles pour une ville specifique.",
+      "item": [
+        {
+          "name": "GET Weather by City",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/weather?q={{city}}&appid={{apiKey}}&lang=fr",
+              "host": ["{{baseUrl}}"],
+              "path": ["weather"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{city}}",
+                  "description": "Nom de la ville a rechercher"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}",
+                  "description": "Cle API OpenWeather"
+                },
+                {
+                  "key": "lang",
+                  "value": "fr",
+                  "description": "Langue des descriptions (francais)"
+                }
+              ]
+            },
+            "description": "Endpoint pour recuperer la meteo actuelle d'une ville."
+          },
+          "response": [
+            {
+              "name": "Succes - Paris",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=Paris&appid={{apiKey}}&lang=fr",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["weather"],
+                  "query": [
+                    {"key": "q", "value": "Paris"},
+                    {"key": "appid", "value": "{{apiKey}}"},
+                    {"key": "lang", "value": "fr"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"coord\": { \"lon\": 2.35, \"lat\": 48.85 },\n  \"weather\": [\n    {\n      \"id\": 800,\n      \"main\": \"Clear\",\n      \"description\": \"ciel clair\",\n      \"icon\": \"01d\"\n    }\n  ],\n  \"base\": \"stations\",\n  \"main\": {\n    \"temp\": 295.15,\n    \"feels_like\": 294.85,\n    \"temp_min\": 293.15,\n    \"temp_max\": 297.15,\n    \"pressure\": 1012,\n    \"humidity\": 65\n  },\n  \"visibility\": 10000,\n  \"wind\": { \"speed\": 12.3, \"deg\": 240 },\n  \"clouds\": { \"all\": 0 },\n  \"dt\": 1625097600,\n  \"sys\": {\n    \"type\": 1,\n    \"id\": 0,\n    \"country\": \"FR\",\n    \"sunrise\": 1625044800,\n    \"sunset\": 1625097600\n  },\n  \"timezone\": 7200,\n  \"id\": 2988507,\n  \"name\": \"Paris\",\n  \"cod\": 200\n}",
+              "type": "default",
+              "_postman_previewtype": "text"
+            },
+            {
+              "name": "Erreur - Ville introuvable",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=VilleInexistante&appid={{apiKey}}&lang=fr",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["weather"],
+                  "query": [
+                    {"key": "q", "value": "VilleInexistante"},
+                    {"key": "appid", "value": "{{apiKey}}"},
+                    {"key": "lang", "value": "fr"}
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"cod\": \"404\",\n  \"message\": \"city not found\"\n}",
+              "type": "default"
+            },
+            {
+              "name": "Erreur - Cle API invalide",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=Paris&appid=INVALID_KEY&lang=fr",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["weather"],
+                  "query": [
+                    {"key": "q", "value": "Paris"},
+                    {"key": "appid", "value": "INVALID_KEY"},
+                    {"key": "lang", "value": "fr"}
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"cod\": 401,\n  \"message\": \"Invalid API key. Please see ...\"\n}",
+              "type": "default"
+            },
+            {
+              "name": "Erreur - Trop de requetes (429)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/weather?q=Paris&appid={{apiKey}}&lang=fr",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["weather"],
+                  "query": [
+                    {"key": "q", "value": "Paris"},
+                    {"key": "appid", "value": "{{apiKey}}"},
+                    {"key": "lang", "value": "fr"}
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"cod\": 429,\n  \"message\": \"API key disabled due to exceeding rate limits\"\n}",
+              "type": "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Previsions 5 jours",
+      "description": "Recupere les previsions meteo sur 5 jours pour une ville specifique.",
+      "item": [
+        {
+          "name": "GET Forecast by City",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/forecast?q={{city}}&appid={{apiKey}}&lang=fr&cnt=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["forecast"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{city}}",
+                  "description": "Nom de la ville a rechercher"
+                },
+                {
+                  "key": "appid",
+                  "value": "{{apiKey}}",
+                  "description": "Cle API OpenWeather"
+                },
+                {
+                  "key": "lang",
+                  "value": "fr",
+                  "description": "Langue des descriptions (francais)"
+                },
+                {
+                  "key": "cnt",
+                  "value": "5",
+                  "description": "Nombre de previsions (5 jours)"
+                }
+              ]
+            },
+            "description": "Endpoint pour recuperer les previsions meteo sur 5 jours pour une ville."
+          },
+          "response": [
+            {
+              "name": "Succes - Paris",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/forecast?q=Paris&appid={{apiKey}}&lang=fr&cnt=5",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["forecast"],
+                  "query": [
+                    {"key": "q", "value": "Paris"},
+                    {"key": "appid", "value": "{{apiKey}}"},
+                    {"key": "lang", "value": "fr"},
+                    {"key": "cnt", "value": "5"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"cod\": \"200\",\n  \"message\": 0,\n  \"cnt\": 5,\n  \"list\": [\n    {\n      \"dt\": 1625124000,\n      \"main\": {\n        \"temp\": 295.15,\n        \"feels_like\": 294.85,\n        \"temp_min\": 293.15,\n        \"temp_max\": 297.15,\n        \"pressure\": 1012,\n        \"sea_level\": 1012,\n        \"grnd_level\": 1008,\n        \"humidity\": 65,\n        \"temp_kf\": 1.0\n      },\n      \"weather\": [\n        {\n          \"id\": 800,\n          \"main\": \"Clear\",\n          \"description\": \"ciel clair\",\n          \"icon\": \"01d\"\n        }\n      ],\n      \"clouds\": { \"all\": 0 },\n      \"wind\": { \"speed\": 12.3, \"deg\": 240, \"gust\": 15.0 },\n      \"visibility\": 10000,\n      \"pop\": 0,\n      \"dt_txt\": \"2021-06-30 12:00:00\"\n    },\n    {\n      \"dt\": 1625210400,\n      \"main\": {\n        \"temp\": 293.15,\n        \"feels_like\": 292.85,\n        \"temp_min\": 291.15,\n        \"temp_max\": 295.15,\n        \"pressure\": 1010,\n        \"sea_level\": 1010,\n        \"grnd_level\": 1006,\n        \"humidity\": 70,\n        \"temp_kf\": 1.0\n      },\n      \"weather\": [\n        {\n          \"id\": 801,\n          \"main\": \"Clouds\",\n          \"description\": \"quelques nuages\",\n          \"icon\": \"02d\"\n        }\n      ],\n      \"clouds\": { \"all\": 25 },\n      \"wind\": { \"speed\": 10.0, \"deg\": 220, \"gust\": 12.0 },\n      \"visibility\": 10000,\n      \"pop\": 0.1,\n      \"dt_txt\": \"2021-07-01 12:00:00\"\n    },\n    {\n      \"dt\": 1625296800,\n      \"main\": {\n        \"temp\": 291.15,\n        \"feels_like\": 290.85,\n        \"temp_min\": 289.15,\n        \"temp_max\": 293.15,\n        \"pressure\": 1008,\n        \"sea_level\": 1008,\n        \"grnd_level\": 1004,\n        \"humidity\": 75,\n        \"temp_kf\": 1.0\n      },\n      \"weather\": [\n        {\n          \"id\": 500,\n          \"main\": \"Rain\",\n          \"description\": \"pluie legere\",\n          \"icon\": \"10d\"\n        }\n      ],\n      \"clouds\": { \"all\": 75 },\n      \"wind\": { \"speed\": 8.0, \"deg\": 200, \"gust\": 10.0 },\n      \"visibility\": 10000,\n      \"pop\": 0.6,\n      \"rain\": { \"3h\": 0.5 },\n      \"dt_txt\": \"2021-07-02 12:00:00\"\n    },\n    {\n      \"dt\": 1625383200,\n      \"main\": {\n        \"temp\": 292.15,\n        \"feels_like\": 291.85,\n        \"temp_min\": 290.15,\n        \"temp_max\": 294.15,\n        \"pressure\": 1006,\n        \"sea_level\": 1006,\n        \"grnd_level\": 1002,\n        \"humidity\": 60,\n        \"temp_kf\": 1.0\n      },\n      \"weather\": [\n        {\n          \"id\": 802,\n          \"main\": \"Clouds\",\n          \"description\": \"nuages disperses\",\n          \"icon\": \"03d\"\n        }\n      ],\n      \"clouds\": { \"all\": 50 },\n      \"wind\": { \"speed\": 14.0, \"deg\": 180, \"gust\": 16.0 },\n      \"visibility\": 10000,\n      \"pop\": 0.2,\n      \"dt_txt\": \"2021-07-03 12:00:00\"\n    },\n    {\n      \"dt\": 1625469600,\n      \"main\": {\n        \"temp\": 294.15,\n        \"feels_like\": 295.00,\n        \"temp_min\": 292.15,\n        \"temp_max\": 296.15,\n        \"pressure\": 1012,\n        \"sea_level\": 1012,\n        \"grnd_level\": 1008,\n        \"humidity\": 55,\n        \"temp_kf\": 1.0\n      },\n      \"weather\": [\n        {\n          \"id\": 800,\n          \"main\": \"Clear\",\n          \"description\": \"ensoleille\",\n          \"icon\": \"01d\"\n        }\n      ],\n      \"clouds\": { \"all\": 0 },\n      \"wind\": { \"speed\": 9.0, \"deg\": 160, \"gust\": 11.0 },\n      \"visibility\": 10000,\n      \"pop\": 0,\n      \"dt_txt\": \"2021-07-04 12:00:00\"\n    }\n  ],\n  \"city\": {\n    \"id\": 2988507,\n    \"name\": \"Paris\",\n    \"coord\": { \"lat\": 48.85, \"lon\": 2.35 },\n    \"country\": \"FR\",\n    \"population\": 0,\n    \"timezone\": 7200,\n    \"sunrise\": 1625044800,\n    \"sunset\": 1625097600\n  }\n}",
+              "type": "default",
+              "_postman_previewtype": "text"
+            },
+            {
+              "name": "Erreur - Ville introuvable",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/forecast?q=VilleInexistante&appid={{apiKey}}&lang=fr&cnt=5",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["forecast"],
+                  "query": [
+                    {"key": "q", "value": "VilleInexistante"},
+                    {"key": "appid", "value": "{{apiKey}}"},
+                    {"key": "lang", "value": "fr"},
+                    {"key": "cnt", "value": "5"}
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "body": "{\n  \"cod\": \"404\",\n  \"message\": \"city not found\"\n}",
+              "type": "default"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "id": "apiKey",
+      "key": "apiKey",
+      "value": "VOTRE_CLE_API_OPENWEATHER",
+      "type": "default",
+      "description": "Cle API OpenWeather pour l'authentification. A remplacer par votre cle personnelle."
+    },
+    {
+      "id": "baseUrl",
+      "key": "baseUrl",
+      "value": "https://api.openweathermap.org/data/2.5",
+      "type": "default",
+      "description": "URL de base de l'API OpenWeather."
+    },
+    {
+      "id": "city",
+      "key": "city",
+      "value": "Paris",
+      "type": "default",
+      "description": "Nom de la ville a rechercher. Exemples: Paris, Lyon, Marseille, London, New York"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "pre-request-script",
+        "type": "text/javascript",
+        "exec": [
+          "// Vérification que la clé API est configurée",
+          "if (!pm.environment.get('apiKey') || pm.environment.get('apiKey') === 'VOTRE_CLE_API_OPENWEATHER') {",
+          "  pm.environment.set('apiKey', pm.collectionVariables.get('apiKey'));",
+          "}",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "test-script",
+        "type": "text/javascript",
+        "exec": [
+          "// Test de base pour toutes les requetes",
+          "pm.test('La requete a ete envoyee avec succes', function() {",
+          "  pm.response.to.have.status.oneOf([200, 404, 401, 429]);",
+          "});",
+          "",
+          "// Test pour les reponses succes (200)",
+          "pm.test('La reponse contient les donnees attendues', function() {",
+          "  if (pm.response.code === 200) {",
+          "    pm.expect(pm.response.json()).to.have.property('name');",
+          "    pm.expect(pm.response.json()).to.have.property('sys');",
+          "    pm.expect(pm.response.json()).to.have.property('main');",
+          "    pm.expect(pm.response.json()).to.have.property('weather');",
+          "    pm.expect(pm.response.json().weather).to.be.an('array').and.to.have.lengthOf.at.least(1);",
+          "  }",
+          "});",
+          "",
+          "// Test pour les erreurs 404",
+          "pm.test('Erreur 404 - Ville introuvable', function() {",
+          "  if (pm.response.code === 404) {",
+          "    pm.expect(pm.response.json()).to.have.property('cod', '404');",
+          "    pm.expect(pm.response.json()).to.have.property('message');",
+          "  }",
+          "});",
+          "",
+          "// Test du temps de reponse",
+          "pm.test('Temps de reponse inferieur a 2 secondes', function() {",
+          "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});"
+        ]
+      }
+    }
+  ]
+}

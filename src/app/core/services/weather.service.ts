@@ -1,187 +1,199 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { WeatherData, ForecastData, ForecastDay } from '../models/weather.model';
-import { getMockWeather, getMockForecast } from '../models/weather.fixture';
-import { environment } from '../../../environment';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  Observable,
+  Subject,
+  catchError,
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  filter,
+  finalize,
+  map,
+  of,
+  switchMap,
+  tap,
+  throwError
+} from 'rxjs';
 
-// Interface pour la reponse brute de l'API OpenWeather (meteo actuelle)
+import { environment } from '../../../../environment';
+import { getForecastFixture, WEATHER_FIXTURES } from '../models/weather.fixtures';
+import { ForecastData, RequestStatus, WeatherData } from '../models/weather.model';
+
+export function kelvinToCelsius(kelvin: number): number {
+  return Math.round((kelvin - 273.15) * 10) / 10;
+}
+
 interface OpenWeatherCurrentResponse {
   name: string;
-  sys: {
-    country: string;
-  };
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-  };
-  wind: {
-    speed: number;
-  };
-  weather: Array<{
-    description: string;
-    icon: string;
-  }>;
+  sys: { country: string };
+  main: { temp: number; feels_like: number; humidity: number };
+  weather: { description: string; icon: string }[];
+  wind: { speed: number };
 }
 
-// Interface pour la reponse brute de l'API OpenWeather (previsions)
 interface OpenWeatherForecastResponse {
-  city: {
-    name: string;
-    country: string;
-  };
-  list: Array<{
-    dt: number;
-    main: {
-      temp: number;
-      feels_like: number;
-      temp_min: number;
-      temp_max: number;
-      humidity: number;
-    };
-    wind: {
-      speed: number;
-    };
-    weather: Array<{
-      description: string;
-      icon: string;
-    }>;
+  city: { name: string; country: string };
+  list: {
     dt_txt: string;
-  }>;
+    main: { temp: number };
+    weather: { description: string; icon: string }[];
+  }[];
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class WeatherService {
-  // Mode fixture active par defaut pour le developpement
-  // Passez a false pour basculer vers l'API OpenWeather
-  private readonly useFixture = true;
+  private readonly http = inject(HttpClient);
 
-  // Configuration OpenWeather depuis environment.ts
-  private readonly apiKey = environment.openWeatherApiKey;
-  private readonly baseUrl = environment.openWeatherBaseUrl;
+  // MODE FIXTURE EN SECOURS SI L'API OPENWEATHER EST INDISPONIBLE
+  private readonly useFixtures = false;
 
-  constructor(private http: HttpClient) {}
+  private readonly citySearch$ = new Subject<string>();
 
-  /**
-   * Recupere les donnees meteo actuelles pour une ville
-   * @param city Nom de la ville
-   * @returns Observable avec les donnees meteo ou une erreur
-   */
-  getWeather(city: string): Observable<WeatherData> {
-    if (this.useFixture) {
-      return of(getMockWeather(city));
-    }
+  private readonly currentWeatherSignal = signal<WeatherData | null>(null);
+  private readonly currentWeatherErrorSignal = signal<string | null>(null);
+  private readonly currentWeatherLoadingSignal = signal(false);
 
-    if (!this.apiKey) {
-      return throwError(() => new Error('Cle API OpenWeather non configuree'));
-    }
+  private readonly forecastSignal = signal<ForecastData | null>(null);
+  private readonly forecastErrorSignal = signal<string | null>(null);
+  private readonly forecastLoadingSignal = signal(false);
 
+  readonly currentWeather = this.currentWeatherSignal.asReadonly();
+  readonly currentWeatherError = this.currentWeatherErrorSignal.asReadonly();
+  readonly currentWeatherStatus = computed<RequestStatus>(() => {
+    if (this.currentWeatherLoadingSignal()) return 'loading';
+    if (this.currentWeatherErrorSignal()) return 'error';
+    if (this.currentWeatherSignal()) return 'success';
+    return 'idle';
+  });
+
+  readonly forecast = this.forecastSignal.asReadonly();
+  readonly forecastError = this.forecastErrorSignal.asReadonly();
+  readonly forecastStatus = computed<RequestStatus>(() => {
+    if (this.forecastLoadingSignal()) return 'loading';
+    if (this.forecastErrorSignal()) return 'error';
+    if (this.forecastSignal()) return 'success';
+    return 'idle';
+  });
+
+  constructor() {
+    // SWITCHMAP ANNULE LA RECHERCHE PRECEDENTE, catchError EMPECHE UNE ERREUR DE FERMER LE FLUX, takeUntilDestroyed DESABONNE A LA DESTRUCTION DU SERVICE
+    this.citySearch$
+      .pipe(
+        map((city) => city.trim()),
+        filter((city) => city.length > 0),
+        debounceTime(300),
+        distinctUntilChanged((previous, current) => previous.toLowerCase() === current.toLowerCase()),
+        switchMap((city) => this.getCurrentWeather(city).pipe(catchError(() => of(null)))),
+        takeUntilDestroyed()
+      )
+      .subscribe();
+  }
+
+  searchCity(city: string): void {
+    this.citySearch$.next(city);
+  }
+
+  getCurrentWeather(city: string): Observable<WeatherData> {
     const normalizedCity = city.trim();
-    const url = `${this.baseUrl}/weather?q=${normalizedCity}&appid=${this.apiKey}&lang=fr`;
+    this.currentWeatherLoadingSignal.set(true);
+    this.currentWeatherErrorSignal.set(null);
 
-    return this.http.get<OpenWeatherCurrentResponse>(url).pipe(
-      map((response) => this.mapCurrentWeather(response)),
-      catchError((error: HttpErrorResponse) => this.handleError(error))
+    return this.fetchCurrentWeather(normalizedCity).pipe(
+      tap((data) => this.currentWeatherSignal.set(data)),
+      catchError((error: unknown) => {
+        this.currentWeatherSignal.set(null);
+        this.currentWeatherErrorSignal.set(this.toErrorMessage(error));
+        return throwError(() => error);
+      }),
+      finalize(() => this.currentWeatherLoadingSignal.set(false))
     );
   }
 
-  /**
-   * Recupere les previsions meteo sur 5 jours pour une ville
-   * @param city Nom de la ville
-   * @returns Observable avec les previsions ou une erreur
-   */
   getForecast(city: string): Observable<ForecastData> {
-    if (this.useFixture) {
-      return of(getMockForecast(city));
-    }
-
-    if (!this.apiKey) {
-      return throwError(() => new Error('Cle API OpenWeather non configuree'));
-    }
-
     const normalizedCity = city.trim();
-    const url = `${this.baseUrl}/forecast?q=${normalizedCity}&appid=${this.apiKey}&lang=fr&cnt=5`;
+    this.forecastLoadingSignal.set(true);
+    this.forecastErrorSignal.set(null);
 
-    return this.http.get<OpenWeatherForecastResponse>(url).pipe(
-      map((response) => this.mapForecastWeather(response)),
-      catchError((error: HttpErrorResponse) => this.handleError(error))
+    return this.fetchForecast(normalizedCity).pipe(
+      tap((data) => this.forecastSignal.set(data)),
+      catchError((error: unknown) => {
+        this.forecastSignal.set(null);
+        this.forecastErrorSignal.set(this.toErrorMessage(error));
+        return throwError(() => error);
+      }),
+      finalize(() => this.forecastLoadingSignal.set(false))
     );
   }
 
-  /**
-   * Mappe la reponse OpenWeather vers WeatherData
-   */
-  private mapCurrentWeather(response: OpenWeatherCurrentResponse): WeatherData {
+  private fetchCurrentWeather(city: string): Observable<WeatherData> {
+    if (this.useFixtures) {
+      const fixture = WEATHER_FIXTURES[city.toLowerCase()];
+      return fixture ? of(fixture).pipe(delay(400)) : throwError(() => ({ status: 404 }));
+    }
+
+    const params = new HttpParams().set('q', city).set('appid', environment.openWeatherApiKey);
+
+    return this.http
+      .get<OpenWeatherCurrentResponse>(`${environment.openWeatherBaseUrl}/weather`, { params })
+      .pipe(map((response) => this.toWeatherData(response)));
+  }
+
+  private fetchForecast(city: string): Observable<ForecastData> {
+    if (this.useFixtures) {
+      const fixture = getForecastFixture(city.toLowerCase());
+      return fixture ? of(fixture).pipe(delay(400)) : throwError(() => ({ status: 404 }));
+    }
+
+    const params = new HttpParams().set('q', city).set('appid', environment.openWeatherApiKey);
+
+    return this.http
+      .get<OpenWeatherForecastResponse>(`${environment.openWeatherBaseUrl}/forecast`, { params })
+      .pipe(map((response) => this.toForecastData(response)));
+  }
+
+  private toWeatherData(response: OpenWeatherCurrentResponse): WeatherData {
     return {
       city: response.name,
       country: response.sys.country,
-      temperature: this.kelvinToCelsius(response.main.temp),
-      feelsLike: this.kelvinToCelsius(response.main.feels_like),
-      description: response.weather[0]?.description || '',
+      temperature: kelvinToCelsius(response.main.temp),
+      feelsLike: kelvinToCelsius(response.main.feels_like),
+      description: response.weather[0]?.description ?? '',
       humidity: response.main.humidity,
-      windSpeed: response.wind.speed,
-      icon: response.weather[0]?.icon || '',
+      // CONVERTIT LES M/S EN KM/H
+      windSpeed: Math.round(response.wind.speed * 3.6),
+      icon: response.weather[0]?.icon ?? ''
     };
   }
 
-  /**
-   * Mappe la reponse OpenWeather vers ForecastData
-   */
-  private mapForecastWeather(response: OpenWeatherForecastResponse): ForecastData {
-    const forecastDays: ForecastDay[] = response.list.map((item) => ({
-      date: item.dt_txt.split(' ')[0],
-      temperature: this.kelvinToCelsius(item.main.temp),
-      feelsLike: this.kelvinToCelsius(item.main.feels_like),
-      minTemp: this.kelvinToCelsius(item.main.temp_min),
-      maxTemp: this.kelvinToCelsius(item.main.temp_max),
-      description: item.weather[0]?.description || '',
-      humidity: item.main.humidity,
-      windSpeed: item.wind.speed,
-      icon: item.weather[0]?.icon || '',
-    }));
+  private toForecastData(response: OpenWeatherForecastResponse): ForecastData {
+    const dailyEntries = response.list.filter((entry) => entry.dt_txt.includes('12:00:00')).slice(0, 5);
 
     return {
       city: response.city.name,
       country: response.city.country,
-      list: forecastDays,
+      days: dailyEntries.map((entry) => ({
+        date: entry.dt_txt.slice(0, 10),
+        temperature: kelvinToCelsius(entry.main.temp),
+        description: entry.weather[0]?.description ?? '',
+        icon: entry.weather[0]?.icon ?? ''
+      }))
     };
   }
 
-  /**
-   * Convertit Kelvin en Celsius
-   */
-  private kelvinToCelsius(kelvin: number): number {
-    return Math.round((kelvin - 273.15) * 10) / 10;
-  }
+  private toErrorMessage(error: unknown): string {
+    const status =
+      error instanceof HttpErrorResponse ? error.status : (error as { status?: number } | null)?.status;
 
-  /**
-   * Gere les erreurs HTTP et les convertit en messages lisibles
-   */
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Impossible de recuperer les donnees meteo.';
-
-    if (error.status === 404) {
-      errorMessage = 'Ville introuvable.';
-    } else if (error.status === 401) {
-      errorMessage = 'Cle API invalide.';
-    } else if (error.status === 429) {
-      errorMessage = 'Trop de requetes, veuillez reessayer dans quelques instants.';
-    } else if (error.error instanceof ErrorEvent) {
-      errorMessage = 'Erreur reseau. Verifiez votre connexion.';
+    if (status === 404) {
+      return 'Ville introuvable.';
     }
 
-    return throwError(() => new Error(errorMessage));
-  }
+    if (status === 429) {
+      return 'Trop de requêtes, veuillez réessayer dans quelques instants.';
+    }
 
-  /**
-   * Active ou desactive le mode fixture (pour les tests)
-   */
-  setFixtureMode(enabled: boolean): void {
-    // @ts-ignore - Property 'useFixture' is private
-    this.useFixture = enabled;
+    return 'Impossible de récupérer les données météo.';
   }
 }
