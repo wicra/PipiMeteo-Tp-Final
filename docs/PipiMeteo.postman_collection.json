@@ -1,0 +1,114 @@
+{
+  "info": {
+    "_postman_id": "9b7b82b5-a2e6-47be-8ae8-4805ddb9ebb5",
+    "name": "PipiMeteo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "35576941"
+  },
+  "item": [
+    {
+      "name": "WeatherApp",
+      "item": [
+        {
+          "name": "Current Weather",
+          "item": [
+            {
+              "name": "Paris",
+              "item": [
+                {
+                  "name": "New Request",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "description": "## Objectif\n\nRécupérer la météo actuelle d'une ville donnée (température, ressenti, description, humidité, vent, icône).\n\n## Méthode HTTP\n\nGET\n\n## URL\n\n`{{base_url}}/weather?q=Paris&appid={{api_key}}`\n\n## Paramètres\n\n| Paramètre | Type | Description |\n| --- | --- | --- |\n| q | query | Nom de la ville recherchée (ex. Paris) |\n| appid | query | Clé API OpenWeather (variable {{api_key}}) |\n\n## Headers\n\nAucun header spécifique requis.\n\n## Réponse attendue\n\n`200 OK` avec un JSON contenant notamment :\n\n- `name` : nom de la ville\n    \n- `sys.country` : code pays\n    \n- `main.temp` : température en Kelvin\n    \n- `main.feels_like` : ressenti en Kelvin\n    \n- `main.humidity` : humidité en %\n    \n- `weather[0].description` : description météo\n    \n- `weather[0].icon` : code icône\n    \n- `wind.speed` : vitesse du vent en m/s\n    \n\n## Données récupérées côté app\n\nMappées vers l'interface `WeatherData` (conversion Kelvin → Celsius et m/s → km/h faite dans `WeatherService`).\n\n## Erreurs possibles\n\n- `404` : ville introuvable\n    \n- `401` : clé API invalide ou pas encore activée\n    \n- `429` : trop de requêtes"
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Lille",
+              "item": [
+                {
+                  "name": "New Request",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "description": "## Objectif\n\nRécupérer la météo actuelle d'une ville donnée (température, ressenti, description, humidité, vent, icône).\n\n## Méthode HTTP\n\nGET\n\n## URL\n\n`{{base_url}}/weather?q=Lille&appid={{api_key}}`\n\n## Paramètres\n\n| Paramètre | Type | Description |\n| --- | --- | --- |\n| q | query | Nom de la ville recherchée (ex. Lille) |\n| appid | query | Clé API OpenWeather (variable {{api_key}}) |\n\n## Headers\n\nAucun header spécifique requis.\n\n## Réponse attendue\n\n`200 OK` avec un JSON contenant notamment :\n\n- `name` : nom de la ville\n    \n- `sys.country` : code pays\n    \n- `main.temp` : température en Kelvin\n    \n- `main.feels_like` : ressenti en Kelvin\n    \n- `main.humidity` : humidité en %\n    \n- `weather[0].description` : description météo\n    \n- `weather[0].icon` : code icône\n    \n- `wind.speed` : vitesse du vent en m/s\n    \n\n## Données récupérées côté app\n\nMappées vers l'interface `WeatherData` (conversion Kelvin → Celsius et m/s → km/h faite dans `WeatherService`).\n\n## Erreurs possibles\n\n- `404` : ville introuvable\n    \n- `401` : clé API invalide ou pas encore activée\n    \n- `429` : trop de requêtes"
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Tokyo",
+              "item": [
+                {
+                  "name": "New Request",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "description": "## Objectif\n\nRécupérer la météo actuelle d'une ville donnée (température, ressenti, description, humidité, vent, icône).\n\n## Méthode HTTP\n\nGET\n\n## URL\n\n`{{base_url}}/weather?q=Tokyo&appid={{api_key}}`\n\n## Paramètres\n\n| Paramètre | Type | Description |\n| --- | --- | --- |\n| q | query | Nom de la ville recherchée (ex. Paris) |\n| appid | query | Clé API OpenWeather (variable {{api_key}}) |\n\n## Headers\n\nAucun header spécifique requis.\n\n## Réponse attendue\n\n`200 OK` avec un JSON contenant notamment :\n\n- `name` : nom de la ville\n    \n- `sys.country` : code pays\n    \n- `main.temp` : température en Kelvin\n    \n- `main.feels_like` : ressenti en Kelvin\n    \n- `main.humidity` : humidité en %\n    \n- `weather[0].description` : description météo\n    \n- `weather[0].icon` : code icône\n    \n- `wind.speed` : vitesse du vent en m/s\n    \n\n## Données récupérées côté app\n\nMappées vers l'interface `WeatherData` (conversion Kelvin → Celsius et m/s → km/h faite dans `WeatherService`).\n\n## Erreurs possibles\n\n- `404` : ville introuvable\n    \n- `401` : clé API invalide ou pas encore activée\n    \n- `429` : trop de requêtes"
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Forecast",
+          "item": [
+            {
+              "name": "New Request",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "description": "## Objectif\n\nRécupérer les prévisions météo sur 5 jours (données par tranche de 3h) pour une ville donnée.\n\n## Méthode HTTP\n\nGET\n\n## URL\n\n`{{base_url}}/forecast?q={{city}}&appid={{api_key}}`\n\n## Paramètres\n\n| Paramètre | Type | Description |\n| --- | --- | --- |\n| q | query | Nom de la ville recherchée (variable {{city}}) |\n| appid | query | Clé API OpenWeather (variable {{api_key}}) |\n\n## Headers\n\nAucun header spécifique requis.\n\n## Réponse attendue\n\n`200 OK` avec un JSON contenant :\n\n- `city.name` / `city.country` : ville et pays\n    \n- `list[]` : liste d'entrées toutes les 3h sur 5 jours, chacune avec :\n    \n    - `dt_txt` : date/heure de la prévision\n        \n    - `main.temp` : température en Kelvin\n        \n    - `weather[0].description` et `weather[0].icon`\n        \n\n## Données récupérées côté app\n\nOn ne garde qu'une entrée par jour (celle la plus proche de midi, `dt_txt` contenant `12:00:00`), mappée vers `ForecastData` (5 `ForecastDay`).\n\n## Erreurs possibles\n\n- `404` : ville introuvable\n    \n- `401` : clé API invalide ou pas encore activée\n    \n- `429` : trop de requêtes"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.openweathermap.org/data/2.5"
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "city",
+      "value": "Paris"
+    }
+  ]
+}
