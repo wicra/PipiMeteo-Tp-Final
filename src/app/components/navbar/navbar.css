@@ -23,6 +23,12 @@
   text-decoration: none;
 }
 
+.navbar__search {
+  flex: 1 1 16rem;
+  max-width: 22rem;
+  padding-block: var(--space-2);
+}
+
 .navbar__title {
   font-family: var(--font-family-heading);
   font-size: 1.25rem;
@@ -70,5 +76,10 @@
     justify-content: center;
     text-align: center;
     padding-block: var(--space-3);
+  }
+
+  .navbar__search {
+    flex-basis: 100%;
+    max-width: 100%;
   }
 }
