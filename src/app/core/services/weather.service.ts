@@ -46,8 +46,8 @@ interface OpenWeatherForecastResponse {
 export class WeatherService {
   private readonly http = inject(HttpClient);
 
-  // MODE FIXTURE EN SECOURS TANT QUE LA CLE API N'EST PAS BRANCHEE OU VALIDEE
-  private readonly useFixtures = true;
+  // MODE FIXTURE EN SECOURS SI L'API OPENWEATHER EST INDISPONIBLE
+  private readonly useFixtures = false;
 
   private readonly citySearch$ = new Subject<string>();
 
