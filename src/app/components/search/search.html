@@ -1,0 +1,9 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <label for="city">Ville</label>
+  <input id="city" type="text" formControlName="city" placeholder="Paris" autocomplete="off" />
+  <button type="submit">Rechercher</button>
+
+  @if (submitted() && cityControl.invalid) {
+    <p role="alert">Veuillez saisir une ville.</p>
+  }
+</form>
