@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--navbar-height));
   gap: var(--space-6);
   padding: var(--space-6);
   text-align: center;
