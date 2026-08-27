@@ -3,7 +3,7 @@
   <input id="city" type="text" formControlName="city" placeholder="Paris" autocomplete="off" />
   <button type="submit">Rechercher</button>
 
-  @if (submitted() && cityControl.invalid) {
+  @if (submitted() && isCityMissing) {
     <p role="alert">Veuillez saisir une ville.</p>
   }
 </form>
