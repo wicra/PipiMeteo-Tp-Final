@@ -25,4 +25,9 @@ Le titre utilise la police "Baloo 2" (Google Fonts, chargee dans `src/index.html
 
 ## Ecran de pluie au demarrage
 
-A venir dans un commit dedie : animation plein ecran de pluie jaune pipi jouee une fois par session (memorisee en `sessionStorage`), qui se fond vers le contenu de l'application.
+`src/app/shared/components/rain-splash` : overlay plein ecran (`position: fixed`, `z-index: 999`) au-dessus du `router-outlet` dans `App`. Fond jaune pipi (`--color-pee`) avec un motif de rayures diagonales anime en boucle (`repeating-linear-gradient` + `background-position`) pour simuler la pluie, sans multiplier les elements DOM.
+
+- Duree : ~1,4s d'animation puis ~0,6s de fondu (opacite) avant disparition complete.
+- Jouee une seule fois par session via `sessionStorage` (cle `pipimeteo-splash-shown`), pas a chaque navigation interne.
+- Respecte `prefers-reduced-motion` : si l'utilisateur a active la reduction des animations au niveau systeme, l'ecran de pluie est saute immediatement.
+- Marque `aria-hidden="true"` car purement decoratif, sans element interactif ni contenu a annoncer aux lecteurs d'ecran.

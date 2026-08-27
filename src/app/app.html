@@ -1,1 +1,5 @@
+@if (showSplash()) {
+  <app-rain-splash (finished)="onSplashFinished()" />
+}
+
 <router-outlet />

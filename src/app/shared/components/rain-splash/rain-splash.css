@@ -1,0 +1,47 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: block;
+}
+
+.rain-splash {
+  position: absolute;
+  inset: 0;
+  background: var(--color-pee);
+  opacity: 1;
+  transition: opacity var(--transition-slow);
+}
+
+.rain-splash--fading {
+  opacity: 0;
+}
+
+.rain-splash__rain {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    100deg,
+    transparent 0,
+    transparent 18px,
+    rgba(31, 36, 48, 0.25) 18px,
+    rgba(31, 36, 48, 0.25) 20px
+  );
+  background-size: 100% 240px;
+  animation: rain-fall 0.5s linear infinite;
+}
+
+@keyframes rain-fall {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rain-splash__rain {
+    animation: none;
+  }
+}
