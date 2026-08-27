@@ -19,7 +19,7 @@
 
 .home__intro h1 {
   font-family: var(--font-family-heading);
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: 700;
   margin: 0;
 }
