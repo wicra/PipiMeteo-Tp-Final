@@ -1,13 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+import { Navbar } from './components/navbar/navbar';
 import { RainSplash } from './shared/components/rain-splash/rain-splash';
 
 const SPLASH_SESSION_KEY = 'pipimeteo-splash-shown';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RainSplash],
+  imports: [RouterOutlet, Navbar, RainSplash],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
