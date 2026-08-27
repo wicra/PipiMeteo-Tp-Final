@@ -42,7 +42,7 @@ Le service peut d'abord retourner la fixture, puis etre branche sur HTTP sans mo
 
 - Attend seulement les noms definitifs des composants, pas le service API.
 - Peut tester `/weather/Paris` avec une ville ecrite dans l'URL.
-
+	
 ## Dev 2 - Formulaire de recherche et design de la page d'accueil
 
 ### Travail independant
