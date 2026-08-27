@@ -4,8 +4,6 @@ import { RouterOutlet } from '@angular/router';
 import { Navbar } from './components/navbar/navbar';
 import { RainSplash } from './shared/components/rain-splash/rain-splash';
 
-const SPLASH_SESSION_KEY = 'pipimeteo-splash-shown';
-
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, Navbar, RainSplash],
@@ -13,10 +11,9 @@ const SPLASH_SESSION_KEY = 'pipimeteo-splash-shown';
   styleUrl: './app.css',
 })
 export class App {
-  protected readonly showSplash = signal(!sessionStorage.getItem(SPLASH_SESSION_KEY));
+  protected readonly showSplash = signal(true);
 
   protected onSplashFinished(): void {
-    sessionStorage.setItem(SPLASH_SESSION_KEY, 'true');
     this.showSplash.set(false);
   }
 }

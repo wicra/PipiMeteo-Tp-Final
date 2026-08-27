@@ -31,7 +31,7 @@ describe('App', () => {
     expect(fixture.nativeElement.querySelector('app-rain-splash')).not.toBeNull();
   });
 
-  it('should hide the splash and remember it for the session once finished', () => {
+  it('should hide the splash once finished', () => {
     fixture = TestBed.createComponent(App);
     fixture.detectChanges();
 
@@ -39,14 +39,17 @@ describe('App', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-rain-splash')).toBeNull();
-    expect(sessionStorage.getItem('pipimeteo-splash-shown')).toBe('true');
   });
 
-  it('should not show the splash again within the same session', () => {
-    sessionStorage.setItem('pipimeteo-splash-shown', 'true');
+  it('should show the splash again on every fresh page load', () => {
     fixture = TestBed.createComponent(App);
     fixture.detectChanges();
+    fixture.componentInstance['onSplashFinished']();
+    fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('app-rain-splash')).toBeNull();
+    const secondLoad = TestBed.createComponent(App);
+    secondLoad.detectChanges();
+
+    expect(secondLoad.nativeElement.querySelector('app-rain-splash')).not.toBeNull();
   });
 });
