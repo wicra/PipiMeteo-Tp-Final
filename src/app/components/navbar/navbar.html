@@ -1,0 +1,15 @@
+<nav class="navbar" aria-label="Navigation principale">
+  <a class="navbar__brand" routerLink="/home">
+    <app-logo [size]="32" />
+    <span class="navbar__title">PipiMeteo</span>
+  </a>
+
+  <ul class="navbar__links">
+    <li>
+      <a routerLink="/home" routerLinkActive="navbar__link--active" class="navbar__link">Accueil</a>
+    </li>
+    <li>
+      <a routerLink="/about" routerLinkActive="navbar__link--active" class="navbar__link">À propos</a>
+    </li>
+  </ul>
+</nav>

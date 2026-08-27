@@ -1,0 +1,21 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="search" novalidate>
+  <label for="city" class="search__label">Ville</label>
+
+  <div class="search__row">
+    <input
+      id="city"
+      type="text"
+      formControlName="city"
+      placeholder="Paris"
+      autocomplete="off"
+      class="search__input"
+      [attr.aria-invalid]="submitted() && isCityMissing"
+      [attr.aria-describedby]="submitted() && isCityMissing ? 'city-error' : null"
+    />
+    <button type="submit" class="search__button">Rechercher</button>
+  </div>
+
+  @if (submitted() && isCityMissing) {
+    <p id="city-error" role="alert" class="search__error">Veuillez saisir une ville.</p>
+  }
+</form>

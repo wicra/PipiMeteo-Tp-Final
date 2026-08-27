@@ -1,0 +1,23 @@
+<section class="about">
+  <h1>À propos de PipiMeteo</h1>
+  <p>
+    Application météo réalisée en équipe dans le cadre du projet final Angular.
+    Recherchez une ville pour consulter sa météo actuelle et ses prévisions à 5 jours.
+  </p>
+
+  <h2>L'équipe</h2>
+  <ul class="about__members">
+    @for (member of members; track member.name) {
+      <li>
+        <strong>{{ member.name }} : </strong>  {{ member.role }}
+      </li>
+    }
+  </ul>
+
+  <h2>Technologies</h2>
+  <ul class="about__technologies">
+    @for (tech of technologies; track tech) {
+      <li>{{ tech }}</li>
+    }
+  </ul>
+</section>
