@@ -20,4 +20,12 @@
       >
     </li>
   </ul>
+
+  <div class="navbar__local-weather" aria-live="polite">
+    @if (localWeatherLoading()) {
+      <span class="navbar__local-weather-loading">Localisation en cours…</span>
+    } @else if (localWeather(); as weather) {
+      <span class="navbar__local-weather-value">{{ weather.city }} · {{ weather.temperature }}°C</span>
+    }
+  </div>
 </nav>

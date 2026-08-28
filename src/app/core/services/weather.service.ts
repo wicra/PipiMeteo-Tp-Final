@@ -59,6 +59,10 @@ export class WeatherService {
   private readonly forecastErrorSignal = signal<string | null>(null);
   private readonly forecastLoadingSignal = signal(false);
 
+  private readonly localWeatherSignal = signal<WeatherData | null>(null);
+  private readonly localWeatherErrorSignal = signal<string | null>(null);
+  private readonly localWeatherLoadingSignal = signal(false);
+
   readonly currentWeather = this.currentWeatherSignal.asReadonly();
   readonly currentWeatherError = this.currentWeatherErrorSignal.asReadonly();
   readonly currentWeatherStatus = computed<RequestStatus>(() => {
@@ -74,6 +78,15 @@ export class WeatherService {
     if (this.forecastLoadingSignal()) return 'loading';
     if (this.forecastErrorSignal()) return 'error';
     if (this.forecastSignal()) return 'success';
+    return 'idle';
+  });
+
+  readonly localWeather = this.localWeatherSignal.asReadonly();
+  readonly localWeatherError = this.localWeatherErrorSignal.asReadonly();
+  readonly localWeatherStatus = computed<RequestStatus>(() => {
+    if (this.localWeatherLoadingSignal()) return 'loading';
+    if (this.localWeatherErrorSignal()) return 'error';
+    if (this.localWeatherSignal()) return 'success';
     return 'idle';
   });
 
@@ -124,6 +137,22 @@ export class WeatherService {
         return throwError(() => error);
       }),
       finalize(() => this.forecastLoadingSignal.set(false))
+    );
+  }
+
+  getLocalWeather(city: string): Observable<WeatherData> {
+    const normalizedCity = city.trim();
+    this.localWeatherLoadingSignal.set(true);
+    this.localWeatherErrorSignal.set(null);
+
+    return this.fetchCurrentWeather(normalizedCity).pipe(
+      tap((data) => this.localWeatherSignal.set(data)),
+      catchError((error: unknown) => {
+        this.localWeatherSignal.set(null);
+        this.localWeatherErrorSignal.set(this.toErrorMessage(error));
+        return throwError(() => error);
+      }),
+      finalize(() => this.localWeatherLoadingSignal.set(false))
     );
   }
 

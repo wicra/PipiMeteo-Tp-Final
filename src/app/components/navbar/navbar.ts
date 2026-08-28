@@ -1,10 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter, map } from 'rxjs';
+import { EMPTY, catchError, filter, map, switchMap } from 'rxjs';
 
-import { Search } from '../search/search';
+import { GeolocationService } from '../../core/services/geolocation.service';
+import { WeatherService } from '../../core/services/weather.service';
 import { Logo } from '../../shared/components/logo/logo';
+import { Search } from '../search/search';
 
 @Component({
   selector: 'app-navbar',
@@ -14,6 +16,8 @@ import { Logo } from '../../shared/components/logo/logo';
 })
 export class Navbar {
   private readonly router = inject(Router);
+  private readonly geolocationService = inject(GeolocationService);
+  private readonly weatherService = inject(WeatherService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -24,4 +28,22 @@ export class Navbar {
   );
 
   protected readonly showSearch = computed(() => !this.currentUrl().startsWith('/home'));
+
+  protected readonly localWeather = this.weatherService.localWeather;
+
+  // L'API DE GEOLOCALISATION EST HEBERGEE SUR UN PLAN GRATUIT QUI SE MET EN VEILLE : LE PREMIER APPEL PEUT PRENDRE ~30S
+  protected readonly localWeatherLoading = computed(
+    () => this.geolocationService.loading() || this.weatherService.localWeatherStatus() === 'loading',
+  );
+
+  constructor() {
+    this.geolocationService
+      .getLocalCity()
+      .pipe(
+        switchMap((city) => this.weatherService.getLocalWeather(city).pipe(catchError(() => EMPTY))),
+        catchError(() => EMPTY),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
+  }
 }

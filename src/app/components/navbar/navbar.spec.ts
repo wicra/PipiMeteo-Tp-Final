@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -16,6 +18,8 @@ describe('Navbar', () => {
     await TestBed.configureTestingModule({
       imports: [Navbar],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([
           { path: 'home', component: StubPage },
           { path: 'weather/:city', component: StubPage },
