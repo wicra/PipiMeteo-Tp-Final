@@ -1,21 +1,33 @@
 import { Component, computed, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { EMPTY, catchError, switchMap } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { EMPTY, catchError, filter, map, switchMap } from 'rxjs';
 
 import { GeolocationService } from '../../core/services/geolocation.service';
 import { WeatherService } from '../../core/services/weather.service';
 import { Logo } from '../../shared/components/logo/logo';
+import { Search } from '../search/search';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, Logo],
+  imports: [RouterLink, RouterLinkActive, Logo, Search],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar {
+  private readonly router = inject(Router);
   private readonly geolocationService = inject(GeolocationService);
   private readonly weatherService = inject(WeatherService);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  protected readonly showSearch = computed(() => !this.currentUrl().startsWith('/home'));
 
   protected readonly localWeather = this.weatherService.localWeather;
 
